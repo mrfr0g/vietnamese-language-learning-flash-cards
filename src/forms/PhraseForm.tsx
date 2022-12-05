@@ -2,6 +2,7 @@ import { Box, Button, FormField, Select, TextInput } from "grommet";
 import { Checkmark, Add } from "grommet-icons";
 import { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { RoundButton } from "../buttons/RoundButton";
 
 export interface PhraseFormFields {
   id: string;
@@ -22,7 +23,7 @@ export function PhraseForm({
 }: PhraseFormProps) {
   const { control, handleSubmit, reset } = useForm<PhraseFormFields>({
     defaultValues: {
-      phrase: "bạn đang làm gì",
+      phrase: "mẹ đang làm gì",
       lang: "vi-VN",
       ...defaultValues,
     },
@@ -69,14 +70,7 @@ export function PhraseForm({
           </FormField>
         )}
       />
-      <Button
-        style={{
-          height: "32px",
-          borderRadius: "100%",
-          background: "rgba(255, 255, 255, .7)",
-          boxShadow: "0px 0px 2px rgba(0, 0, 0, .4)",
-          alignSelf: "center",
-        }}
+      <RoundButton
         icon={
           defaultValues?.id ? (
             <Checkmark color="brand" size="small" />

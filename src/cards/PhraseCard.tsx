@@ -1,6 +1,8 @@
-import { Button, Card, CardBody, CardFooter, Text } from "grommet";
+import { Card, CardBody, CardFooter, Text } from "grommet";
 import { Play } from "grommet-icons";
 import { useCallback, useContext, useState } from "react";
+import { RecordAudioButton } from "../buttons/RecordAudioButton";
+import { RoundButton } from "../buttons/RoundButton";
 import { Base64, PhraseTTLContext } from "../contexts/PhraseTTLContext";
 import { PhraseFormFields } from "../forms/PhraseForm";
 import { createAudioBuffer } from "./createAudioBuffer";
@@ -21,6 +23,9 @@ interface PhraseCardProps {
 export function PhraseCard({ phrase }: PhraseCardProps) {
   const { ttls, setTtl } = useContext(PhraseTTLContext);
   const [waveformData, setWaveformData] = useState<Array<number>>([]);
+  const [recordedWaveformData, setRecordedWaveformData] = useState<
+    Array<number>
+  >([]);
 
   const speakPhrase = useCallback(async () => {
     let phraseSoundBase64 = ttls[phrase.phrase];
@@ -50,21 +55,28 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
     playSound(phraseSound);
   }, [ttls, setTtl, setWaveformData]);
 
+  const recordPhrase = useCallback(
+    async (content: string) => {
+      const phraseSound = await createAudioBuffer(
+        content.replace("data:application/octet-stream;base64,", "")
+      );
+
+      setRecordedWaveformData(parseData(phraseSound));
+    },
+    [setRecordedWaveformData]
+  );
+
   return (
     <Card pad="medium">
       <CardBody>
         <Text>{phrase.phrase}</Text>
         <WaveformVisualization data={waveformData} />
+        <WaveformVisualization data={recordedWaveformData} />
       </CardBody>
-      <CardFooter>
-        <Button
+      <CardFooter direction="row" justify="end" gap="small">
+        <RecordAudioButton onChange={recordPhrase} />
+        <RoundButton
           icon={<Play color="brand" size="small" />}
-          plain
-          style={{
-            borderRadius: 25,
-            padding: 5,
-            boxShadow: "0px 0px 2px #000",
-          }}
           onClick={speakPhrase}
         />
       </CardFooter>
