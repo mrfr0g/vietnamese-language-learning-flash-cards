@@ -5,9 +5,9 @@ import { RecordAudioButton } from "../buttons/RecordAudioButton";
 import { RoundButton } from "../buttons/RoundButton";
 import { Base64, PhraseTTLContext } from "../contexts/PhraseTTLContext";
 import { PhraseFormFields } from "../forms/PhraseForm";
-import { createAudioBuffer } from "./createAudioBuffer";
-import { parseData } from "./parseData";
-import { playSound } from "./playSound";
+import { createAudioBuffer } from "../utils/createAudioBuffer";
+import { parseData } from "../utils/parseData";
+import { playSound } from "../utils/playSound";
 import { WaveformVisualization } from "./WaveformVisualization";
 
 type PredictResponse = {

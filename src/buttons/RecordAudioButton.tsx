@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { Microphone, Stop } from "grommet-icons";
 import { RoundButton } from "./RoundButton";
 import { Box } from "grommet";
-import { blobToBase64 } from "../cards/blobToBase64";
+import { blobToBase64 } from "../utils/blobToBase64";
 import { Base64 } from "../contexts/PhraseTTLContext";
 
 interface RecordAudioButtonProps {
