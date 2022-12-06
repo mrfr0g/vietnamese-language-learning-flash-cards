@@ -25,12 +25,19 @@ License: [Creative Commons v4](https://creativecommons.org/licenses/by/4.0/)
 ## Screenshots
 
 _Add a phrase_
+
 <img width="706" alt="Screen Shot 2022-12-05 at 11 49 51 PM" src="https://user-images.githubusercontent.com/177652/205852373-1d56f1fe-5954-4e7a-af85-8a96a22b8eaf.png">
 
 _Play phrase_
+
 <img width="367" alt="Screen Shot 2022-12-05 at 11 50 21 PM" src="https://user-images.githubusercontent.com/177652/205852474-a602275c-e6d3-43a2-8f1f-7ab528309df4.png">
 
 _Record phrase and compare_
+
 <img width="371" alt="Screen Shot 2022-12-05 at 11 50 11 PM" src="https://user-images.githubusercontent.com/177652/205852508-5bbfcead-b6da-4d89-b7a8-0e881b451f35.png">
 
+## Trying it yourself
 
+* Clone the repository
+* Install dependencies -- `yarn install`
+* Start the react app -- `yarn start`
