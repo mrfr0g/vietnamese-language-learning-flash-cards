@@ -63,25 +63,8 @@ export function CapturePhrasesScreen({
       }}
       align="center"
     >
-      <Box direction="row" align="center">
+      <Box direction="row">
         <Text as="h1">Add a phrase</Text>
-        <Button
-          style={{
-            padding: 0,
-            paddingBottom: 4,
-            borderBottom: "1px solid",
-          }}
-          icon={
-            <Announce
-              color="brand"
-              style={{
-                width: "24px",
-                height: "24px",
-              }}
-            />
-          }
-          onClick={handleGotoNextScreen}
-        />
       </Box>
       <PhraseForm onSubmit={handleAddPhrase} />
       <Box>
@@ -93,6 +76,24 @@ export function CapturePhrasesScreen({
             onSubmit={handleUpdatePhrase}
           />
         ))}
+      </Box>
+      <Box alignSelf="end">
+        <Button
+          style={{
+            padding: 4,
+          }}
+          label="Play"
+          icon={
+            <Announce
+              color="brand"
+              style={{
+                width: "24px",
+                height: "24px",
+              }}
+            />
+          }
+          onClick={handleGotoNextScreen}
+        />
       </Box>
     </Box>
   );
