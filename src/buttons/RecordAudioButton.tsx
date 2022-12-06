@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Microphone, Stop } from "grommet-icons";
 import { RoundButton } from "./RoundButton";
 import { Box } from "grommet";
@@ -6,16 +6,21 @@ import { blobToBase64 } from "../utils/blobToBase64";
 import { Base64 } from "../contexts/PhraseTTLContext";
 
 interface RecordAudioButtonProps {
+  stopAfterSeconds?: number;
   onChange: (content: Base64) => void;
 }
 
-export function RecordAudioButton({ onChange }: RecordAudioButtonProps) {
+export function RecordAudioButton({
+  stopAfterSeconds,
+  onChange,
+}: RecordAudioButtonProps) {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>();
+  const [startTime, setStartTime] = useState(Date.now());
 
   const recordPhrase = useCallback(
-    (stream) => {
-      if (mediaRecorder) {
-        mediaRecorder.stop();
+    (stream: MediaStream) => {
+      if (mediaRecorder || !stream) {
+        mediaRecorder?.stop();
         setMediaRecorder(null);
         return;
       }
@@ -33,12 +38,34 @@ export function RecordAudioButton({ onChange }: RecordAudioButtonProps) {
         onChange(recordedBase64);
       });
 
+      setStartTime(Date.now());
       recorder.start();
 
       setMediaRecorder(recorder);
     },
-    [mediaRecorder, setMediaRecorder]
+    [mediaRecorder, setMediaRecorder, setStartTime]
   );
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (stopAfterSeconds) {
+        const now = Date.now();
+        if (now - startTime >= stopAfterSeconds * 1000) {
+          console.log("auto stop");
+          // debugger;
+          recordPhrase(null);
+          clearInterval(id);
+
+          mediaRecorder?.stop();
+          setMediaRecorder(null);
+        }
+      }
+    }, 500);
+
+    return () => {
+      clearInterval(id);
+    };
+  }, [startTime, setStartTime, mediaRecorder, setMediaRecorder]);
 
   const handleInitMicrophone = useCallback(() => {
     navigator.mediaDevices

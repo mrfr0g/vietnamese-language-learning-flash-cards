@@ -32,6 +32,7 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
   const [phraseComparisonResult, setPhraseComparisonResult] = useState<
     Array<number>
   >([]);
+  const [phraseDuration, setPhraseDuration] = useState(0);
 
   const phraseAudioBuffer = useMemo(async () => {
     let phraseSoundBase64 = ttls[phrase.phrase];
@@ -62,8 +63,9 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
   useEffect(() => {
     phraseAudioBuffer.then((buf) => {
       setWaveformData(parseData(buf));
+      setPhraseDuration(buf.duration);
     });
-  }, [phraseAudioBuffer, setWaveformData]);
+  }, [phraseAudioBuffer, setWaveformData, setPhraseDuration]);
 
   const speakPhrase = useCallback(async () => {
     playSound(await phraseAudioBuffer);
@@ -185,7 +187,10 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
         <WaveformVisualization data={recordedWaveformData} />
       </CardBody>
       <CardFooter direction="row" justify="end" gap="small">
-        <RecordAudioButton onChange={recordPhrase} />
+        <RecordAudioButton
+          stopAfterSeconds={phraseDuration + 1}
+          onChange={recordPhrase}
+        />
         <RoundButton
           icon={<Play color="brand" size="small" />}
           onClick={speakPhrase}
