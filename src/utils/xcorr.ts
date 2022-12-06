@@ -2,8 +2,6 @@
 
 import { FFT } from "dsp.js";
 
-console.log("dsp", FFT);
-
 export function xcorr(sig1: Array<number>, sig2: Array<number>) {
   if (sig1.length !== sig2.length) {
     throw new Error(
