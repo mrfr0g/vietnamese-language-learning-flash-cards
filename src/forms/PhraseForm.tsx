@@ -23,7 +23,7 @@ export function PhraseForm({
 }: PhraseFormProps) {
   const { control, handleSubmit, reset } = useForm<PhraseFormFields>({
     defaultValues: {
-      phrase: "mẹ đang làm gì",
+      phrase: "mẹ nấu món gì",
       lang: "vi-VN",
       ...defaultValues,
     },
@@ -56,7 +56,7 @@ export function PhraseForm({
           </FormField>
         )}
       />
-      <Controller
+      {/* <Controller
         control={control}
         name="lang"
         render={({ field }) => (
@@ -69,7 +69,7 @@ export function PhraseForm({
             />
           </FormField>
         )}
-      />
+      /> */}
       <RoundButton
         icon={
           defaultValues?.id ? (
