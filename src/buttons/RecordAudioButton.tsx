@@ -51,8 +51,6 @@ export function RecordAudioButton({
       if (stopAfterSeconds) {
         const now = Date.now();
         if (now - startTime >= stopAfterSeconds * 1000) {
-          console.log("auto stop");
-          // debugger;
           recordPhrase(null);
           clearInterval(id);
 
