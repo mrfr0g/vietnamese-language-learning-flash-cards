@@ -2,7 +2,13 @@
 
 import { FFT } from "dsp.js";
 
-export function xcorr(sig1: Array<number>, sig2: Array<number>) {
+type XCorrResult = {
+  xcorr: Float64Array;
+  xcorrMax: number;
+  iMax: number;
+};
+
+export function xcorr(sig1: Array<number>, sig2: Array<number>): XCorrResult {
   if (sig1.length !== sig2.length) {
     throw new Error(
       `Xcorr: signal have different lengths ${sig1.length} vs ${sig2.length}`

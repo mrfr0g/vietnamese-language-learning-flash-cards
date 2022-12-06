@@ -1,10 +1,11 @@
-import { Card, CardBody, CardFooter, Text } from "grommet";
+import { Box, Card, CardBody, CardFooter, Text } from "grommet";
 import { Play } from "grommet-icons";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { RecordAudioButton } from "../buttons/RecordAudioButton";
 import { RoundButton } from "../buttons/RoundButton";
 import { Base64, PhraseTTLContext } from "../contexts/PhraseTTLContext";
 import { PhraseFormFields } from "../forms/PhraseForm";
+import { chunk } from "../utils/array";
 import { createAudioBuffer } from "../utils/createAudioBuffer";
 import { filterData, parseData, trimFront } from "../utils/parseData";
 import { playSound } from "../utils/playSound";
@@ -28,6 +29,9 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
     Array<number>
   >([]);
   const [recordedAudioBuffer, setRecordedAudioBuffer] = useState<AudioBuffer>();
+  const [phraseComparisonResult, setPhraseComparisonResult] = useState<
+    Array<number>
+  >([]);
 
   const phraseAudioBuffer = useMemo(async () => {
     let phraseSoundBase64 = ttls[phrase.phrase];
@@ -84,65 +88,99 @@ export function PhraseCard({ phrase }: PhraseCardProps) {
         return;
       }
 
+      // Trim off empty initial sound
       const phraseData = trimFront(filterData(buf, buf.length));
       let recordedData = trimFront(
         filterData(recordedAudioBuffer, recordedAudioBuffer.length)
       );
 
-      // Ensure arrays are a power of 2 for comparison
-      const nextLen = Math.pow(
-        2,
-        Math.ceil(Math.log(phraseData.length) / Math.log(2))
+      // Split waveform into chunks by phrase breaks and compare chunks
+      // The idea is to be able to compare the words individually.
+      // This won't always be correct, because words do not take a uniform
+      // amount of time in the waveform, but it should give us an idea of
+      // accuracy by word.
+
+      const phraseWordsLength = phrase.phrase.split(" ").length;
+      const phraseChunks = chunk(
+        phraseData,
+        phraseData.length / phraseWordsLength
+      );
+      const recordedChunks = chunk(
+        recordedData,
+        phraseData.length / phraseWordsLength
       );
 
-      while (phraseData.length < nextLen) {
-        phraseData.push(0);
-      }
+      const result = [];
 
-      // Normalize data to the same length //
-      recordedData = recordedData.slice(0, phraseData.length);
+      phraseChunks.forEach((chunk, i) => {
+        const phraseChunk = chunk;
+        const recordedChunk = recordedChunks[i];
 
-      // Append short recordings with 0
-      if (recordedData.length < phraseData.length) {
-        while (recordedData.length < phraseData.length) {
-          recordedData.push(0);
+        // Pad chunk to nearest pow(2)
+        const nextLen = Math.pow(
+          2,
+          Math.ceil(Math.log(phraseChunk.length) / Math.log(2))
+        );
+
+        while (phraseChunk.length < nextLen) {
+          phraseChunk.push(0);
+          recordedChunk.push(0);
         }
+
+        // Compare words
+        result.push(xcorr(phraseChunk, recordedChunk).xcorrMax);
+      });
+
+      setPhraseComparisonResult(result);
+    });
+  }, [phraseAudioBuffer, recordedAudioBuffer, setPhraseComparisonResult]);
+
+  const parsedPhraseComparisonResult = useMemo(() => {
+    const phraseParts = phrase.phrase.split(" ");
+    return phraseComparisonResult.map((result, i) => {
+      let color;
+      if (result >= 0.75) {
+        color = "green";
+      }
+      if (result < 0.75) {
+        color = "rgb(234, 230, 10)";
+      }
+      if (result < 0.5) {
+        color = "#ffb300";
+      }
+      if (result < 0.25) {
+        color = "red";
       }
 
-      // Compare waveforms
-      console.log(xcorr(phraseData, recordedData));
+      return {
+        result,
+        word: phraseParts[i],
+        color,
+      };
     });
-    // if (!recordedWaveformData.length) {
-    //   return;
-    // }
-
-    // for (let i = 0; i < waveformData.length; i++) {
-    //   const start = i * 32;
-    //   const end = start + 32;
-    //   const ttlBuffer: Array<number> = Array.prototype.slice.call(
-    //     waveformData,
-    //     start,
-    //     end
-    //   );
-    //   const recordedWaveBuffer: Array<number> = Array.prototype.slice.call(
-    //     recordedWaveformData,
-    //     start,
-    //     end
-    //   );
-
-    //   try {
-    //     console.log(xcorr(ttlBuffer, recordedWaveBuffer));
-    //   } catch (e) {
-    //     console.log("e", e);
-    //     break;
-    //   }
-    // }
-  }, [phraseAudioBuffer, recordedAudioBuffer]);
+  }, [phraseComparisonResult]);
 
   return (
     <Card pad="medium">
       <CardBody>
-        <Text>{phrase.phrase}</Text>
+        {phraseComparisonResult && phraseComparisonResult.length ? (
+          <Box direction="row" gap="xxsmall">
+            {parsedPhraseComparisonResult.map((result, i) => (
+              <Text
+                style={{
+                  background: "black",
+                }}
+                key={result.word + i}
+                color={result.color}
+                title={`Result: ${result.result}`}
+              >
+                {result.word}{" "}
+              </Text>
+            ))}
+          </Box>
+        ) : (
+          <Text>{phrase.phrase}</Text>
+        )}
         <WaveformVisualization data={waveformData} />
         <WaveformVisualization data={recordedWaveformData} />
       </CardBody>
